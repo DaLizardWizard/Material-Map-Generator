@@ -1,4 +1,5 @@
 from cog import BasePredictor, Path, Input
+from typing import List
 import torch
 import utils.imgops as ops
 import utils.architecture.architecture as arch
@@ -34,7 +35,7 @@ class Predictor(BasePredictor):
 
     def predict(self,
             image: Path = Input(description="RGB Image to generate maps from"),
-    ) -> Path:
+    ) -> List[Path]:
         """Run a single prediction on the model"""
         shutil.copyfile(image, "/tmp/image.png")
         img_path = "/tmp/image.png"
@@ -62,7 +63,7 @@ class Predictor(BasePredictor):
             output = (output * 255.).round()
             return output
         
-        rlts = [process(img, model) for model in self.models]
+        rlts = [process(self,img, model) for model in self.models]
 
         # ... pre-processing ...
         normal_map = rlts[0]
@@ -70,9 +71,9 @@ class Predictor(BasePredictor):
         displacement = rlts[1][:, :, 0]
 
         output_paths = []
-        for i, index in enumerate(normal_map,roughness,displacement):
-            output_path = f"/tmp/out-{i}.png"
-            image.save(output_path)
+        for index, item in enumerate([normal_map,roughness,displacement]):
+            output_path = f"/tmp/out-{index}.png"
+            cv2.imwrite(output_path, item)
             output_paths.append(Path(output_path))
             
         return output_paths
