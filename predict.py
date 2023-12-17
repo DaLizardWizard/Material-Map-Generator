@@ -5,6 +5,7 @@ import utils.architecture.architecture as arch
 import cv2
 import numpy as np
 import torch
+import shutil
 import sys
 
 class Predictor(BasePredictor):
@@ -35,11 +36,14 @@ class Predictor(BasePredictor):
             image: Path = Input(description="RGB Image to generate maps from"),
     ) -> Path:
         """Run a single prediction on the model"""
-        # read image
+        shutil.copyfile(image, "/tmp/image.png")
+        img_path = "/tmp/image.png"
+
         try: 
-            img = cv2.imread(image, cv2.cv2.IMREAD_COLOR)
+            img = cv2.imread(img_path)
         except:
-            img = cv2.imread(image, cv2.IMREAD_COLOR)
+            img = cv2.imread(img_path)
+
             
         # Seamless modes
         img = cv2.copyMakeBorder(img, 16, 16, 16, 16, cv2.BORDER_WRAP)
